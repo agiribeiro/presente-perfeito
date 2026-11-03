@@ -1,0 +1,8 @@
+cache/
+.venv/
+__pycache__/
+*.bak
+*.bak2
+catalogo_presentes_backup_*.xlsx
+~$*.xlsx
+.DS_Store
