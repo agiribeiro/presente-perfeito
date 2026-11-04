@@ -134,26 +134,33 @@ button{font:inherit;cursor:pointer}
 const AFFILIATE_TAG = "logicamentepresente-20";          // seu ID de rastreamento Amazon Associados
 let CATALOGO = [];
 
-const PERGUNTAS = [
-  { key:"tipo", eyebrow:"Pergunta 1 de 6", titulo:"O que você procura?", single:true,
+const PERGUNTAS_BASE = [
+  { key:"tipo", titulo:"O que você procura?", single:true,
     opts:[ ["jogo","Jogo de tabuleiro","Cartas, tabuleiro, dados"], ["brinquedo","Brinquedo","Educativo, criativo, de rua"],
            ["lego","LEGO / construção","Blocos e kits de montar"], ["surpresa","Surpreenda-me","Qualquer categoria"] ] },
-  { key:"idade", eyebrow:"Pergunta 2 de 6", titulo:"Quantos anos tem quem vai ganhar?", tipo:"idade",
+  { key:"genero", titulo:"Para quem é o presente?", single:true, so:["brinquedo","lego"],
+    hint:"Só muda o peso de itens que a marca posiciona para um público; a maioria serve para qualquer criança.",
+    opts:[ ["ambos","Tanto faz","Qualquer criança"], ["menina","Menina",""], ["menino","Menino",""] ] },
+  { key:"idade", titulo:"Quantos anos tem quem vai ganhar?", tipo:"idade",
     hint:"Vale a idade de quem vai jogar mais, não a mínima da caixa." },
-  { key:"perfil", eyebrow:"Pergunta 3 de 6", titulo:"Como essa pessoa é?", hint:"Escolha até 2.", max:2,
+  { key:"perfil", titulo:"Como essa pessoa é?", hint:"Escolha até 2.", max:2,
     opts:[ ["criativo","Criativa","Inventa, desenha, conta histórias"], ["competitivo","Competitiva","Quer vencer"],
            ["curioso","Curiosa","Gosta de descobrir e deduzir"], ["construção","Construtora","Monta e encaixa"],
            ["ciência","Científica","Números, lógica, natureza"], ["arte","Artística","Cor, desenho, estética"],
            ["esportes","Agitada","Reflexo e velocidade"], ["estratégia","Estrategista","Planeja e decide"],
            ["personagens","Fã de personagens","Bichos, heróis, monstros"], ["brincar em grupo","De turma","Melhor com várias pessoas"] ] },
-  { key:"preco", eyebrow:"Pergunta 4 de 6", titulo:"Quanto quer gastar?", single:true,
+  { key:"preco", titulo:"Quanto quer gastar?", single:true,
     opts:[ ["1","Até R$ 80",""], ["2","R$ 80 a 150",""], ["3","R$ 150 a 250",""], ["4","Acima de R$ 250",""] ] },
-  { key:"ocasiao", eyebrow:"Pergunta 5 de 6", titulo:"Qual é a ocasião?", single:true,
+  { key:"ocasiao", titulo:"Qual é a ocasião?", single:true,
     opts:[ ["aniversario","Aniversário",""], ["natal","Natal",""], ["criancas","Dia das Crianças",""], ["nenhuma","Sem ocasião","Só porque sim"] ] },
-  { key:"prio", eyebrow:"Pergunta 6 de 6", titulo:"O que importa mais?", single:true,
+  { key:"prio", titulo:"O que importa mais?", single:true,
     opts:[ ["div","Diversão","Risada e vontade de repetir"], ["edu","Educativo","Treina alguma habilidade"],
            ["cri","Criatividade","Imaginação e expressão"], ["imp","Impressionar","Uau ao abrir a caixa"], ["cb","Custo-benefício","Valor pelo que custa"] ] },
 ];
+function perguntas(){
+  const lista=PERGUNTAS_BASE.filter(q=>!q.so || q.so.includes(resp.tipo));
+  return lista.map((q,i)=>Object.assign({},q,{eyebrow:`Pergunta ${i+1} de ${lista.length}`}));
+}
 const NOME_TAG = {criativo:"criativa",competitivo:"competitiva",curioso:"curiosa",construção:"construtora",ciência:"científica",arte:"artística",esportes:"agitada",estratégia:"estrategista",personagens:"fã de personagens","brincar em grupo":"de turma",motor:"de movimento","faz de conta":"de faz de conta"};
 const NOME_PRIO = {div:"diversão",edu:"educativo",cri:"criatividade",imp:"impressionar",cb:"custo-benefício"};
 const FAIXAS = {1:[0,80],2:[80,150],3:[150,250],4:[250,99999]};
@@ -185,6 +192,11 @@ function pontuar(j, r){
     else if (Math.abs(fj-fr)===1){ s+=1; det.push("preço faixa vizinha +1"); }
     else { s-=2; det.push("preço longe −2"); }
   } else { s+=1; det.push("preço desconhecido +1 (neutro)"); }
+  // público (brinquedo/LEGO): empurrão leve, nunca filtro
+  if (r.genero && r.genero!=="ambos" && j.genero){
+    if (j.genero===r.genero){ s+=2; det.push("público +2"); }
+    else { s-=3; det.push("público oposto −3"); }
+  }
   // prioridade: nota 0-3 × 2.5
   const p=j[r.prio]||0; s+=2.5*p; det.push(`${NOME_PRIO[r.prio]} ${p}×2.5 = +${2.5*p}`);
   if (p===3) razoes.push(`forte em ${NOME_PRIO[r.prio]}`);
@@ -200,7 +212,7 @@ function recomendar(r){
   return CATALOGO.map(j=>pontuar(j,r)).filter(Boolean).sort((a,b)=>b.score-a.score).slice(0,5);
 }
 function linkAmazon(j){
-  const q=encodeURIComponent(j.nome+" jogo");
+  const q=encodeURIComponent(j.nome+({jogo:" jogo",lego:"",brinquedo:" brinquedo"}[j.tipo]||""));
   if (j.url_afiliado) return j.url_afiliado;                      // vindo da Creators API (já com o tag)
   return j.asin ? `https://www.amazon.com.br/dp/${j.asin}?tag=${AFFILIATE_TAG}`
                 : `https://www.amazon.com.br/s?k=${q}&tag=${AFFILIATE_TAG}`;
@@ -208,24 +220,25 @@ function linkAmazon(j){
 const BRL=v=>"R$ "+Number(v).toFixed(2).replace(".",",");
 
 // ---------- UI ----------
-const resp={tipo:null,idade:null,perfil:[],preco:null,ocasiao:null,prio:null};
+const resp={tipo:null,genero:null,idade:null,perfil:[],preco:null,ocasiao:null,prio:null};
 let passo=0;
 const $=s=>document.querySelector(s);
 const quiz=$("#quiz"), steps=$("#steps"), results=$("#results");
 
 
 function renderSteps(){
-  steps.innerHTML = PERGUNTAS.map((_,i)=>`<div class="pip ${i<passo?"done":i===passo?"now":""}"></div>`).join("")
-    + `<span>${Math.min(passo+1,6)} / 6</span>`;
+  const P=perguntas();
+  steps.innerHTML = P.map((_,i)=>`<div class="pip ${i<passo?"done":i===passo?"now":""}"></div>`).join("")
+    + `<span>${Math.min(passo+1,P.length)} / ${P.length}</span>`;
 }
 function pronto(){
-  const q=PERGUNTAS[passo], v=resp[q.key];
+  const q=perguntas()[passo], v=resp[q.key];
   if (q.tipo==="idade") return Number.isInteger(v) && v>=1 && v<=99;
   if (q.max) return v.length>=1;
   return !!v;
 }
 function renderQuiz(){
-  const q=PERGUNTAS[passo];
+  const P=perguntas(), q=P[passo], ultimo=passo===P.length-1;
   let corpo="";
   if (q.tipo==="idade"){
     const chips=[4,5,6,7,8,9,10,12,14,16];
@@ -244,7 +257,7 @@ function renderQuiz(){
   quiz.innerHTML=`<div class="eyebrow">${q.eyebrow}</div><h2>${q.titulo}</h2>${q.hint?`<p class="hint">${q.hint}</p>`:""}${corpo}
     <div class="nav">
       <button class="btn ghost" id="voltar" ${passo===0?"disabled":""}>← Voltar</button>
-      <button class="btn" id="avancar" ${pronto()?"":"disabled"}>${passo===5?"Ver os 5 presentes":"Continuar →"}</button>
+      <button class="btn" id="avancar" ${pronto()?"":"disabled"}>${ultimo?"Ver os 5 presentes":"Continuar →"}</button>
     </div>`;
   quiz.querySelectorAll(".opt").forEach(b=>b.addEventListener("click",()=>{
     if (b.dataset.idade){ resp.idade=+b.dataset.idade; }
@@ -262,13 +275,13 @@ function renderQuiz(){
 }
 function avancar(){
   if (!pronto()) return;
-  if (passo<5){ passo++; renderSteps(); renderQuiz(); }
+  if (passo<perguntas().length-1){ passo++; renderSteps(); renderQuiz(); }
   else renderResultados();
 }
 function renderResultados(){
   const top=recomendar(resp), cur=$("#curadoria").checked;
   quiz.hidden=true; steps.hidden=true; results.hidden=false;
-  const resumo=[resp.idade>=18?"adulto":`${resp.idade} anos`, ...resp.perfil.map(t=>NOME_TAG[t]), PERGUNTAS[3].opts.find(o=>o[0]===resp.preco)[1], NOME_PRIO[resp.prio]];
+  const resumo=[resp.idade>=18?"adulto":`${resp.idade} anos`, ...(resp.genero&&resp.genero!=="ambos"?[resp.genero]:[]), ...resp.perfil.map(t=>NOME_TAG[t]), PERGUNTAS_BASE.find(q=>q.key==="preco").opts.find(o=>o[0]===resp.preco)[1], NOME_PRIO[resp.prio]];
   let html=`<div class="card"><div class="eyebrow">Resultado</div><h2>${top.length?`Os ${top.length} presentes que mais combinam`:"Ainda não temos jogo para esse perfil"}</h2>
     <div class="summary" style="margin-top:10px">${resumo.map(t=>`<span class="chip">${t}</span>`).join("")}</div></div>`;
   if (!top.length) html+=`<div class="empty">Não achei nada para essa combinação. Tente outra faixa de preço ou “Surpreenda-me”.</div>`;
@@ -295,8 +308,8 @@ function renderResultados(){
   });
   html+=`<div class="nav"><button class="btn ghost" id="refazer">← Refazer o quiz</button><button class="btn" id="ajustar">Mudar só a prioridade</button></div>`;
   results.innerHTML=html;
-  $("#refazer").addEventListener("click",()=>{ Object.assign(resp,{tipo:null,idade:null,perfil:[],preco:null,ocasiao:null,prio:null}); passo=0; results.hidden=true; quiz.hidden=false; steps.hidden=false; renderSteps(); renderQuiz(); window.scrollTo({top:0}); });
-  $("#ajustar").addEventListener("click",()=>{ passo=5; results.hidden=true; quiz.hidden=false; steps.hidden=false; renderSteps(); renderQuiz(); window.scrollTo({top:0}); });
+  $("#refazer").addEventListener("click",()=>{ Object.assign(resp,{tipo:null,genero:null,idade:null,perfil:[],preco:null,ocasiao:null,prio:null}); passo=0; results.hidden=true; quiz.hidden=false; steps.hidden=false; renderSteps(); renderQuiz(); window.scrollTo({top:0}); });
+  $("#ajustar").addEventListener("click",()=>{ passo=perguntas().length-1; results.hidden=true; quiz.hidden=false; steps.hidden=false; renderSteps(); renderQuiz(); window.scrollTo({top:0}); });
   window.scrollTo({top:0});
 }
 $("#curadoria").addEventListener("change",()=>{ if (!results.hidden) renderResultados(); });

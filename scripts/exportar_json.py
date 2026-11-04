@@ -28,7 +28,7 @@ for i, row in enumerate(ws.iter_rows(min_row=2, values_only=True), 1):
         preco=float(d["preco"] or d["preco_ref_estimado"] or 0), preco_lista=float(d["preco_lista"] or 0),
         disponivel=(d["disponivel"] in (None, "", "sim", True)), url_imagem=d["url_imagem"] or "", url_afiliado=d["url_afiliado"] or "",
         por_que=pq, editora=d["editora"] or "", ativo=(d["ativo"] == "sim"),
-        atualizado_em=str(d["atualizado_em"] or ""),
+        atualizado_em=str(d["atualizado_em"] or ""), genero=(str(d.get("genero") or "").strip().lower() or ""),
     ))
 json.dump(out, open(saida, "w", encoding="utf-8"), ensure_ascii=False)
 print(f"{saida}: {len(out)} jogos ({'só ativos' if so_ativos else 'todos'})")
