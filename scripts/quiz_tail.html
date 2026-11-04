@@ -4,13 +4,28 @@
 const AFFILIATE_TAG = "logicamentepresente-20";          // seu ID de rastreamento Amazon Associados
 const CATALOGO = JSON.parse(document.getElementById("catalogo").textContent);
 
+const ICO = {
+  dado:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.3" fill="currentColor"/></svg>',
+  urso:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="7" r="2.5"/><circle cx="18" cy="7" r="2.5"/><circle cx="12" cy="13" r="7"/><circle cx="9.5" cy="12" r=".8" fill="currentColor"/><circle cx="14.5" cy="12" r=".8" fill="currentColor"/><path d="M10.5 15.5c.8.8 2.2.8 3 0"/></svg>',
+  bloco:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="9" width="18" height="11" rx="2"/><rect x="6" y="5" width="4" height="4" rx="1"/><rect x="14" y="5" width="4" height="4" rx="1"/></svg>',
+  presente:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M3 12h18M12 8v13M12 8c-3-5-8-3-6 0M12 8c3-5 8-3 6 0"/></svg>',
+  todos:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M15 20c0-2.6 1.3-4.5 3.5-5 1.5 0 2.5 1.5 2.5 5"/></svg>',
+  menina:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="9" r="4"/><path d="M12 13v8M9 18h6"/></svg>',
+  menino:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="14" r="4.5"/><path d="M13.5 10.5 20 4M15 4h5v5"/></svg>',
+  riso:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2.5 4 2.5 4-2.5 4-2.5"/><circle cx="9" cy="9.5" r=".8" fill="currentColor"/><circle cx="15" cy="9.5" r=".8" fill="currentColor"/></svg>',
+  livro:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h6a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H4zM20 5h-6a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h7z"/></svg>',
+  lampada:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.6 1 1.4 1 2.5h6c0-1.1.3-1.9 1-2.5A6 6 0 0 0 12 3z"/></svg>',
+  estrela:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3 2.8 5.8 6.2.9-4.5 4.4 1.1 6.3L12 17.5 6.4 20.4l1.1-6.3L3 9.7l6.2-.9z"/></svg>',
+  moeda:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5c0-1 1-1.5 2.5-1.5s2.5.6 2.5 1.6c0 2.4-5 1.4-5 3.9 0 1 1 1.5 2.5 1.5s2.5-.5 2.5-1.5"/></svg>',
+};
+const HUE = {criativo:"#FF6B6B",competitivo:"#2E5BFF",curioso:"#1E9E63",construção:"#FFC53D",ciência:"#7B96FF",arte:"#E05297",esportes:"#FF8A3D",estratégia:"#5B3FD6","personagens":"#16B8C9","brincar em grupo":"#9C6B2F"};
 const PERGUNTAS_BASE = [
   { key:"tipo", titulo:"O que você procura?", single:true,
-    opts:[ ["jogo","Jogo de tabuleiro","Cartas, tabuleiro, dados"], ["brinquedo","Brinquedo","Educativo, criativo, de rua"],
-           ["lego","LEGO / construção","Blocos e kits de montar"], ["surpresa","Surpreenda-me","Qualquer categoria"] ] },
+    opts:[ ["jogo","Jogo de tabuleiro","Cartas, tabuleiro, dados","dado"], ["brinquedo","Brinquedo","Educativo, criativo, de rua","urso"],
+           ["lego","LEGO / construção","Blocos e kits de montar","bloco"], ["surpresa","Surpreenda-me","Qualquer categoria","presente"] ] },
   { key:"genero", titulo:"Para quem é o presente?", single:true, so:["brinquedo","lego"],
     hint:"Só muda o peso de itens que a marca posiciona para um público; a maioria serve para qualquer criança.",
-    opts:[ ["ambos","Tanto faz","Qualquer criança"], ["menina","Menina",""], ["menino","Menino",""] ] },
+    opts:[ ["ambos","Tanto faz","Qualquer criança","todos"], ["menina","Menina","","menina"], ["menino","Menino","","menino"] ] },
   { key:"idade", titulo:"Quantos anos tem quem vai ganhar?", tipo:"idade",
     hint:"Vale a idade de quem vai jogar mais, não a mínima da caixa." },
   { key:"perfil", titulo:"Como essa pessoa é?", hint:"Escolha até 2.", max:2,
@@ -21,11 +36,9 @@ const PERGUNTAS_BASE = [
            ["personagens","Fã de personagens","Bichos, heróis, monstros"], ["brincar em grupo","De turma","Melhor com várias pessoas"] ] },
   { key:"preco", titulo:"Quanto quer gastar?", single:true,
     opts:[ ["1","Até R$ 80",""], ["2","R$ 80 a 150",""], ["3","R$ 150 a 250",""], ["4","Acima de R$ 250",""] ] },
-  { key:"ocasiao", titulo:"Qual é a ocasião?", single:true,
-    opts:[ ["aniversario","Aniversário",""], ["natal","Natal",""], ["criancas","Dia das Crianças",""], ["nenhuma","Sem ocasião","Só porque sim"] ] },
   { key:"prio", titulo:"O que importa mais?", single:true,
-    opts:[ ["div","Diversão","Risada e vontade de repetir"], ["edu","Educativo","Treina alguma habilidade"],
-           ["cri","Criatividade","Imaginação e expressão"], ["imp","Impressionar","Uau ao abrir a caixa"], ["cb","Custo-benefício","Valor pelo que custa"] ] },
+    opts:[ ["div","Diversão","Risada e vontade de repetir","riso"], ["edu","Educativo","Treina alguma habilidade","livro"],
+           ["cri","Criatividade","Imaginação e expressão","lampada"], ["imp","Impressionar","Uau ao abrir a caixa","estrela"], ["cb","Custo-benefício","Valor pelo que custa","moeda"] ] },
 ];
 function perguntas(){
   const lista=PERGUNTAS_BASE.filter(q=>!q.so || q.so.includes(resp.tipo));
@@ -70,10 +83,8 @@ function pontuar(j, r){
   // prioridade: nota 0-3 × 2.5
   const p=j[r.prio]||0; s+=2.5*p; det.push(`${NOME_PRIO[r.prio]} ${p}×2.5 = +${2.5*p}`);
   if (p===3) razoes.push(`forte em ${NOME_PRIO[r.prio]}`);
-  // ocasião: pequeno ajuste
-  if (r.ocasiao==="natal"||r.ocasiao==="aniversario"){ s+=0.5*j.imp; det.push(`ocasião (impressionar) +${0.5*j.imp}`); }
-  if (r.ocasiao==="criancas"){ s+=0.5*j.div; det.push(`ocasião (diversão) +${0.5*j.div}`); }
-  if (r.ocasiao==="nenhuma"){ s+=0.5*j.cb; det.push(`ocasião (custo-benefício) +${0.5*j.cb}`); }
+  // itens com link direto e foto convertem melhor: empurrão pequeno
+  if (j.url_afiliado){ s+=0.5; det.push("link direto +0.5"); }
   // desempate determinístico: jogos mais leves primeiro para crianças menores
   s += (idade<8 ? (2-j.peso)*0.1 : 0);
   return {jogo:j, score:+s.toFixed(2), razoes, det};
@@ -90,7 +101,7 @@ function linkAmazon(j){
 const BRL=v=>"R$ "+Number(v).toFixed(2).replace(".",",");
 
 // ---------- UI ----------
-const resp={tipo:null,genero:null,idade:null,perfil:[],preco:null,ocasiao:null,prio:null};
+const resp={tipo:null,genero:null,idade:null,perfil:[],preco:null,prio:null};
 let passo=0;
 const $=s=>document.querySelector(s);
 const quiz=$("#quiz"), steps=$("#steps"), results=$("#results");
@@ -98,8 +109,7 @@ $("#ncat").textContent=CATALOGO.length; $("#ncom").textContent=CATALOGO.filter(j
 
 function renderSteps(){
   const P=perguntas();
-  steps.innerHTML = P.map((_,i)=>`<div class="pip ${i<passo?"done":i===passo?"now":""}"></div>`).join("")
-    + `<span>${Math.min(passo+1,P.length)} / ${P.length}</span>`;
+  steps.innerHTML = `<div class="track"><i style="width:${Math.round((passo+1)/P.length*100)}%"></i></div><span>${Math.min(passo+1,P.length)} de ${P.length}</span>`;
 }
 function pronto(){
   const q=perguntas()[passo], v=resp[q.key];
@@ -119,9 +129,10 @@ function renderQuiz(){
         <input id="idade" type="number" min="1" max="99" inputmode="numeric" value="${resp.idade??""}" aria-label="Idade"></label>
     </div>`;
   } else {
-    corpo=`<div class="opts">${q.opts.map(([v,l,d])=>{
+    corpo=`<div class="opts">${q.opts.map(([v,l,d,ic])=>{
       const on=q.max ? resp[q.key].includes(v) : resp[q.key]===v;
-      return `<button class="opt" data-v="${v}" aria-pressed="${on}"><b>${l}</b>${d?`<small>${d}</small>`:""}</button>`;
+      const hue=HUE[v]?` dot" style="--hue:${HUE[v]}`:"";
+      return `<button class="opt${hue}" data-v="${v}" aria-pressed="${on}">${ic?`<span class="ico">${ICO[ic]}</span>`:""}<b>${l}</b>${d?`<small>${d}</small>`:""}</button>`;
     }).join("")}</div>`;
   }
   quiz.innerHTML=`<div class="eyebrow">${q.eyebrow}</div><h2>${q.titulo}</h2>${q.hint?`<p class="hint">${q.hint}</p>`:""}${corpo}
@@ -150,17 +161,19 @@ function avancar(){
 }
 function renderResultados(){
   const top=recomendar(resp), cur=$("#curadoria").checked;
-  quiz.hidden=true; steps.hidden=true; results.hidden=false;
+  quiz.hidden=true; steps.hidden=true; results.hidden=false; document.body.classList.add("resultado");
   const resumo=[resp.idade>=18?"adulto":`${resp.idade} anos`, ...(resp.genero&&resp.genero!=="ambos"?[resp.genero]:[]), ...resp.perfil.map(t=>NOME_TAG[t]), PERGUNTAS_BASE.find(q=>q.key==="preco").opts.find(o=>o[0]===resp.preco)[1], NOME_PRIO[resp.prio]];
-  let html=`<div class="card"><div class="eyebrow">Resultado</div><h2>${top.length?`Os ${top.length} presentes que mais combinam`:"Ainda não temos jogo para esse perfil"}</h2>
-    <div class="summary" style="margin-top:10px">${resumo.map(t=>`<span class="chip">${t}</span>`).join("")}</div></div>`;
+  let html=`<div class="card"><div class="eyebrow">Resultado</div><h2>${top.length?`Os ${top.length} presentes que mais combinam`:"Ainda não temos nada para esse perfil"}</h2>
+    <div class="summary">${resumo.map(t=>`<span class="chip">${t}</span>`).join("")}</div></div>`;
   if (!top.length) html+=`<div class="empty">Não achei nada para essa combinação. Tente outra faixa de preço ou “Surpreenda-me”.</div>`;
   top.forEach((r,i)=>{
     const j=r.jogo;
+    const preco = j.url_afiliado&&j.preco>0 ? `<div class="preco">${BRL(j.preco)}${j.preco_lista>j.preco?`<s>${BRL(j.preco_lista)}</s>`:""}<small>na Amazon</small></div>`
+                : `<div class="preco"><small>${j.preco>0?`≈ R$ ${j.preco} · ver preço atual`:"ver preço na Amazon"}</small></div>`;
     html+=`<article class="res ${i===0?"top":""}">
-      <div class="rank">${i===0?"Nº 1":i+1}</div>
+      <div class="rank">${i===0?"Melhor escolha":"Nº "+(i+1)}</div>
+      <div class="foto">${j.url_imagem?`<img src="${j.url_imagem}" alt="" loading="lazy">`:`<svg class="semfoto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M3 12h18M12 8v13M12 8c-3-5-8-3-6 0M12 8c3-5 8-3 6 0"/></svg>`}</div>
       <div class="body">
-        ${j.url_imagem?`<img class="capa" src="${j.url_imagem}" alt="" loading="lazy">`:""}
         <h3>${j.nome}</h3>
         <div class="meta">
           ${j.tipo==="jogo"?`<span class="chip">${j.jog_min===j.jog_max?j.jog_min:`${j.jog_min}–${j.jog_max}`} jogadores</span><span class="chip">${j.dur} min</span>`:`<span class="chip">${j.tipo==="lego"?"LEGO":"brinquedo"}</span>`}
@@ -170,16 +183,16 @@ function renderResultados(){
         <p class="why">${j.por_que}</p>
         ${r.razoes.length?`<div class="match">Combina porque é ${r.razoes.map(t=>`<span class="chip tag">${t}</span>`).join("")}</div>`:""}
         <div class="cta">
+          ${preco}
           <a href="${linkAmazon(j)}" target="_blank" rel="noopener sponsored">Ver na Amazon →</a>
-          <span class="faixa">${j.url_afiliado&&j.preco>0?`${BRL(j.preco)}${j.preco_lista>j.preco?` <s>${BRL(j.preco_lista)}</s>`:""} na Amazon`:(j.preco>0?`faixa de referência ≈ R$ ${j.preco}`:"preço atual na Amazon")}</span>
         </div>
         ${cur?`<div class="score">score ${r.score}\n${r.det.join("\n")}</div>`:""}
       </div></article>`;
   });
   html+=`<div class="nav"><button class="btn ghost" id="refazer">← Refazer o quiz</button><button class="btn" id="ajustar">Mudar só a prioridade</button></div>`;
   results.innerHTML=html;
-  $("#refazer").addEventListener("click",()=>{ Object.assign(resp,{tipo:null,genero:null,idade:null,perfil:[],preco:null,ocasiao:null,prio:null}); passo=0; results.hidden=true; quiz.hidden=false; steps.hidden=false; renderSteps(); renderQuiz(); window.scrollTo({top:0}); });
-  $("#ajustar").addEventListener("click",()=>{ passo=perguntas().length-1; results.hidden=true; quiz.hidden=false; steps.hidden=false; renderSteps(); renderQuiz(); window.scrollTo({top:0}); });
+  $("#refazer").addEventListener("click",()=>{ Object.assign(resp,{tipo:null,genero:null,idade:null,perfil:[],preco:null,prio:null}); passo=0; results.hidden=true; quiz.hidden=false; steps.hidden=false; document.body.classList.remove("resultado"); renderSteps(); renderQuiz(); window.scrollTo({top:0}); });
+  $("#ajustar").addEventListener("click",()=>{ passo=perguntas().length-1; results.hidden=true; quiz.hidden=false; steps.hidden=false; document.body.classList.remove("resultado"); renderSteps(); renderQuiz(); window.scrollTo({top:0}); });
   window.scrollTo({top:0});
 }
 $("#curadoria").addEventListener("change",()=>{ if (!results.hidden) renderResultados(); });
