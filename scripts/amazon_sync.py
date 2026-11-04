@@ -20,6 +20,10 @@ Modos:
     python3 amazon_sync.py catalogo_presentes.xlsx --atualizar
         Para cada linha COM asin, grava preco, preco_lista, disponivel, url_imagem,
         url_afiliado e atualizado_em (colunas cinzas). É o que roda todo dia.
+    python3 amazon_sync.py catalogo_presentes.xlsx --buscar "LEGO Technic" --buscar "LEGO Friends" --tipo lego
+    python3 amazon_sync.py catalogo_presentes.xlsx --buscar "brinquedo educativo 4 anos" --tipo brinquedo
+        Varre palavras-chave na Amazon (10 resultados cada) e grava os produtos novos na aba
+        Candidatos, já com ASIN, preço, foto e link. Você preenche perfil/notas/por_que e aprova.
     python3 amazon_sync.py catalogo_presentes.xlsx --teste
         Só testa as credenciais com uma busca.
 
@@ -105,12 +109,16 @@ def descobrir(ws, api):
         g = lambda c: ws.cell(r, h[c]).value
         if not g("nome") or g("asin") or g("asin_sugerido"): continue
         nome = str(g("nome")).strip()
-        arq = CACHE / ("amz_" + re.sub(r"[^a-zA-Z0-9]+", "_", nome)[:60] + ".json")
+        tipo = str(g("tipo") or "jogo").strip().lower()
+        termo = str(g("busca_amazon") or "").strip() if "busca_amazon" in h else ""
+        if not termo:
+            termo = nome + {"jogo": " jogo de tabuleiro", "lego": " LEGO", "brinquedo": " brinquedo"}.get(tipo, "")
+        arq = CACHE / ("amz_" + re.sub(r"[^a-zA-Z0-9]+", "_", termo)[:60] + ".json")
         if arq.exists():
             cand = json.loads(arq.read_text(encoding="utf-8"))
         else:
             try:
-                res = api.search_items(keywords=f"{nome} jogo de tabuleiro", item_count=3)
+                res = api.search_items(keywords=termo, item_count=3)
                 cand = [extrair(it) for it in (res.items or [])]
             except Exception as e:
                 print(f"  [{nome}] erro na busca: {str(e)[:120]}"); continue
@@ -125,6 +133,49 @@ def descobrir(ws, api):
         n += 1
         if n % 20 == 0: print(f"  {n} sugestões…")
     print(f"descobrir: {n} sugestões gravadas (asin_sugerido / titulo_amazon / confianca)")
+
+
+def buscar(wb, api, termos, tipo, item_count=10):
+    """Varre palavras-chave na Amazon e grava os produtos novos na aba Candidatos."""
+    cand = wb["Candidatos"]
+    h = {c.value: i + 1 for i, c in enumerate(cand[1]) if c.value}
+    ja = set()
+    for aba in ("Catálogo", "Candidatos", "Rejeitados"):
+        ws = wb[aba]; hh = {c.value: i + 1 for i, c in enumerate(ws[1]) if c.value}
+        for r in range(2, ws.max_row + 1):
+            for col in ("asin", "asin_sugerido"):
+                v = ws.cell(r, hh[col]).value if col in hh else None
+                if v: ja.add(str(v).strip())
+    n = 0
+    for termo in termos:
+        arq = CACHE / ("amzb_" + re.sub(r"[^a-zA-Z0-9]+", "_", termo)[:60] + ".json")
+        if arq.exists():
+            itens = json.loads(arq.read_text(encoding="utf-8"))
+        else:
+            try:
+                res = api.search_items(keywords=termo, item_count=item_count)
+                itens = [extrair(it) for it in (res.items or [])]
+            except Exception as e:
+                print(f"  [{termo}] erro: {str(e)[:120]}"); continue
+            arq.write_text(json.dumps(itens, ensure_ascii=False), encoding="utf-8")
+        novos = 0
+        for d in itens:
+            if not d["asin"] or d["asin"] in ja: continue
+            m = re.search(r"(\d{1,2})\s*\+|(\d{1,2})\s*anos|(\d{1,2})\s*-\s*\d{1,2}\s*anos", d["titulo"] or "", re.I)
+            idade = int(next(x for x in m.groups() if x)) if m else None
+            linha = {"aprovar": "", "data_sugestao": HOJE[:10], "asin": d["asin"], "nome": d["titulo"], "tipo": tipo,
+                     "idade_min": idade, "idade_ideal_min": idade, "idade_ideal_max": (idade + 4) if idade else None,
+                     "perfil": "", "por_que": "(rascunho automático)", "ativo": "não", "nome_en": d["titulo"],
+                     "preco": d["preco"], "preco_lista": d["preco_lista"], "disponivel": d["disponivel"],
+                     "url_imagem": d["url_imagem"], "url_afiliado": d["url_afiliado"], "atualizado_em": HOJE,
+                     "jogadores_min": 1, "jogadores_max": 1, "duracao_min": 0, "complexidade": 1.0,
+                     "origem": f"busca amazon: {termo}", "observacoes": "Vindo da busca por palavra-chave; preencher perfil, notas e por_que."}
+            r = cand.max_row + 1
+            for col, val in linha.items():
+                if col in h: cand.cell(r, h[col]).value = val
+            ja.add(d["asin"]); novos += 1; n += 1
+        print(f"  '{termo}': {len(itens)} resultados, {novos} novos")
+    print(f"buscar: {n} candidatos gravados em Candidatos")
 
 
 def aceitar(ws):
@@ -174,6 +225,10 @@ def main():
         it = (res.items or [None])[0]
         print("OK, versão", VERSION, "→", extrair(it) if it else "busca vazia"); return
     wb = load_workbook(arq); ws = wb["Catálogo"]
+    if "--buscar" in args:
+        termos = [args[i + 1] for i, a in enumerate(args) if a == "--buscar"]
+        tipo = args[args.index("--tipo") + 1] if "--tipo" in args else "brinquedo"
+        buscar(wb, cliente(), termos, tipo)
     if "--descobrir" in args: descobrir(ws, cliente())
     if "--aceitar" in args: aceitar(ws)
     if "--atualizar" in args: atualizar(ws, cliente())

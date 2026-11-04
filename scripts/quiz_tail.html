@@ -6,8 +6,8 @@ const CATALOGO = JSON.parse(document.getElementById("catalogo").textContent);
 
 const PERGUNTAS = [
   { key:"tipo", eyebrow:"Pergunta 1 de 6", titulo:"O que você procura?", single:true,
-    opts:[ ["jogo","Jogo de tabuleiro","Cartas, tabuleiro, dados"], ["brinquedo","Brinquedo","Em breve no catálogo"],
-           ["lego","LEGO / construção","Em breve no catálogo"], ["surpresa","Surpreenda-me","Qualquer categoria"] ] },
+    opts:[ ["jogo","Jogo de tabuleiro","Cartas, tabuleiro, dados"], ["brinquedo","Brinquedo","Educativo, criativo, de rua"],
+           ["lego","LEGO / construção","Blocos e kits de montar"], ["surpresa","Surpreenda-me","Qualquer categoria"] ] },
   { key:"idade", eyebrow:"Pergunta 2 de 6", titulo:"Quantos anos tem quem vai ganhar?", tipo:"idade",
     hint:"Vale a idade de quem vai jogar mais, não a mínima da caixa." },
   { key:"perfil", eyebrow:"Pergunta 3 de 6", titulo:"Como essa pessoa é?", hint:"Escolha até 2.", max:2,
@@ -141,7 +141,7 @@ function renderResultados(){
   const resumo=[resp.idade>=18?"adulto":`${resp.idade} anos`, ...resp.perfil.map(t=>NOME_TAG[t]), PERGUNTAS[3].opts.find(o=>o[0]===resp.preco)[1], NOME_PRIO[resp.prio]];
   let html=`<div class="card"><div class="eyebrow">Resultado</div><h2>${top.length?`Os ${top.length} presentes que mais combinam`:"Ainda não temos jogo para esse perfil"}</h2>
     <div class="summary" style="margin-top:10px">${resumo.map(t=>`<span class="chip">${t}</span>`).join("")}</div></div>`;
-  if (!top.length) html+=`<div class="empty">O catálogo ainda só tem jogos de tabuleiro. Volte e escolha “Jogo” ou “Surpreenda-me”.</div>`;
+  if (!top.length) html+=`<div class="empty">Não achei nada para essa combinação. Tente outra faixa de preço ou “Surpreenda-me”.</div>`;
   top.forEach((r,i)=>{
     const j=r.jogo;
     html+=`<article class="res ${i===0?"top":""}">
@@ -150,10 +150,9 @@ function renderResultados(){
         ${j.url_imagem?`<img class="capa" src="${j.url_imagem}" alt="" loading="lazy">`:""}
         <h3>${j.nome}</h3>
         <div class="meta">
-          <span class="chip">${j.jog_min===j.jog_max?j.jog_min:`${j.jog_min}–${j.jog_max}`} jogadores</span>
-          <span class="chip">${j.dur} min</span>
+          ${j.tipo==="jogo"?`<span class="chip">${j.jog_min===j.jog_max?j.jog_min:`${j.jog_min}–${j.jog_max}`} jogadores</span><span class="chip">${j.dur} min</span>`:`<span class="chip">${j.tipo==="lego"?"LEGO":"brinquedo"}</span>`}
           <span class="chip">${j.idade_min}+</span>
-          ${j.editora?`<span class="chip">${j.editora}</span>`:""}
+          ${j.editora&&j.editora!=="LEGO"?`<span class="chip">${j.editora}</span>`:""}
         </div>
         <p class="why">${j.por_que}</p>
         ${r.razoes.length?`<div class="match">Combina porque é ${r.razoes.map(t=>`<span class="chip tag">${t}</span>`).join("")}</div>`:""}
