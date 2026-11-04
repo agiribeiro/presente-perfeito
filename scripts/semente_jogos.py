@@ -65,7 +65,7 @@ JOGOS = [
          mecanicas="memory; dice rolling", editora="Blue Orange/Galápagos", preco=170,
          perfil=["curioso", "personagens"], prio=dict(div=2, edu=2, cri=0, imp=2, cb=1),
          por_que="Jogo da memória com pinguins de madeira que escondem ovos coloridos. Bonito de ver e bom para os 4 anos."),
-    dict(nome="Gobblet Gobblers", nome_en="Gobblet Gobblers", bgg_id=None,
+    dict(nome="Nhac Nhac", nome_en="Gobblet Gobblers", bgg_id=None,
          idade_min=5, ideal=(5, 8), jog=(2, 2), dur=10, peso=1.2,
          mecanicas="pattern building; abstract strategy", editora="Blue Orange/Galápagos", preco=150,
          perfil=["estratégia", "curioso", "competitivo"], prio=dict(div=2, edu=3, cri=0, imp=2, cb=1),
