@@ -9,7 +9,7 @@ Credenciais (Associates Central → Ferramentas → Creators API → criar crede
 aparece uma vez). Defina no Terminal, nunca na planilha:
     export AMAZON_CRED_ID="..."
     export AMAZON_CRED_SECRET="..."
-    export AMAZON_TAG="logicamentejogos-20"        # opcional; é o padrão
+    export AMAZON_TAG="logicamentepresente-20"        # opcional; é o padrão
 
 Modos:
     python3 amazon_sync.py catalogo_presentes.xlsx --descobrir
@@ -36,7 +36,7 @@ except ImportError:
 
 CRED_ID = os.environ.get("AMAZON_CRED_ID", "").strip()
 CRED_SECRET = os.environ.get("AMAZON_CRED_SECRET", "").strip()
-TAG = os.environ.get("AMAZON_TAG", "logicamentejogos-20").strip()
+TAG = os.environ.get("AMAZON_TAG", "logicamentepresente-20").strip()
 VERSION = os.environ.get("AMAZON_API_VERSION") or ("3.1" if CRED_ID.startswith("amzn1.") else "2.1")
 CACHE = Path("cache"); CACHE.mkdir(exist_ok=True)
 HOJE = dt.datetime.now().strftime("%Y-%m-%d %H:%M")
