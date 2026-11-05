@@ -148,7 +148,7 @@ body.resultado .hero h1{font-size:clamp(1.4rem,4vw,1.9rem)}
         </div>
         <span>Presente Perfeito</span>
       </div>
-      <h1>Qual é o <em>presente perfeito</em> para essa criança?</h1>
+      <h1>Qual é o <em>presente perfeito</em> para sua criança?</h1>
       <p class="lead">Responda 5 perguntas e receba 5 ideias que combinam de verdade: jogos de tabuleiro, LEGO e brinquedos, com preço e link para comprar na Amazon.</p>
     </div>
     <div class="toys" aria-hidden="true">
@@ -167,7 +167,6 @@ body.resultado .hero h1{font-size:clamp(1.4rem,4vw,1.9rem)}
 
   <footer class="foot">
     <p id="disclosure">Como Associada da Amazon, a autora deste site recebe por compras qualificadas. Os preços e a disponibilidade mostrados são os da Amazon no momento da sua visita.</p>
-    <label><input type="checkbox" id="curadoria"> Modo curadoria (mostrar a pontuação de cada resultado)</label>
     <p>Catálogo: <span id="ncat"></span> jogos · <span id="ncom"></span> com preço da Amazon · preços atualizados em <span id="atualizado"></span> · <a href="privacidade.html">Política de privacidade</a></p>
   </footer>
 </div>
@@ -336,7 +335,7 @@ function avancar(){
   else renderResultados();
 }
 function renderResultados(){
-  const top=recomendar(resp), cur=$("#curadoria").checked;
+  const top=recomendar(resp), cur=false;
   quiz.hidden=true; steps.hidden=true; results.hidden=false; document.body.classList.add("resultado");
   const resumo=[resp.idade>=18?"adulto":`${resp.idade} anos`, ...(resp.genero&&resp.genero!=="ambos"?[resp.genero]:[]), ...resp.perfil.map(t=>NOME_TAG[t]), PERGUNTAS_BASE.find(q=>q.key==="preco").opts.find(o=>o[0]===resp.preco)[1], NOME_PRIO[resp.prio]];
   let html=`<div class="card"><div class="eyebrow">Resultado</div><h2>${top.length?`Os ${top.length} presentes que mais combinam`:"Ainda não temos nada para esse perfil"}</h2>
@@ -371,7 +370,6 @@ function renderResultados(){
   $("#ajustar").addEventListener("click",()=>{ passo=perguntas().length-1; results.hidden=true; quiz.hidden=false; steps.hidden=false; document.body.classList.remove("resultado"); renderSteps(); renderQuiz(); window.scrollTo({top:0}); });
   window.scrollTo({top:0});
 }
-$("#curadoria").addEventListener("change",()=>{ if (!results.hidden) renderResultados(); });
 
 function iniciar(){
   $("#ncat").textContent=CATALOGO.length;

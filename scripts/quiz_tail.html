@@ -162,7 +162,7 @@ function avancar(){
   else renderResultados();
 }
 function renderResultados(){
-  const top=recomendar(resp), cur=$("#curadoria").checked;
+  const top=recomendar(resp), cur=false;
   quiz.hidden=true; steps.hidden=true; results.hidden=false; document.body.classList.add("resultado");
   const resumo=[resp.idade>=18?"adulto":`${resp.idade} anos`, ...(resp.genero&&resp.genero!=="ambos"?[resp.genero]:[]), ...resp.perfil.map(t=>NOME_TAG[t]), PERGUNTAS_BASE.find(q=>q.key==="preco").opts.find(o=>o[0]===resp.preco)[1], NOME_PRIO[resp.prio]];
   let html=`<div class="card"><div class="eyebrow">Resultado</div><h2>${top.length?`Os ${top.length} presentes que mais combinam`:"Ainda não temos nada para esse perfil"}</h2>
@@ -197,7 +197,6 @@ function renderResultados(){
   $("#ajustar").addEventListener("click",()=>{ passo=perguntas().length-1; results.hidden=true; quiz.hidden=false; steps.hidden=false; document.body.classList.remove("resultado"); renderSteps(); renderQuiz(); window.scrollTo({top:0}); });
   window.scrollTo({top:0});
 }
-$("#curadoria").addEventListener("change",()=>{ if (!results.hidden) renderResultados(); });
 
 renderSteps(); renderQuiz();
 </script>
