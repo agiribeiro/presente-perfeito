@@ -264,14 +264,16 @@ function pontuar(j, r){
   // prioridade: nota 0-3 × 2.5
   const p=j[r.prio]||0; s+=2.5*p; det.push(`${NOME_PRIO[r.prio]} ${p}×2.5 = +${2.5*p}`);
   if (p===3) razoes.push(`forte em ${NOME_PRIO[r.prio]}`);
-  // itens com link direto e foto convertem melhor: empurrão pequeno
-  if (j.url_afiliado){ s+=0.5; det.push("link direto +0.5"); }
+  // marca se tem foto + preço reais (match completo na Amazon)
+  const completo = !!(j.url_afiliado && j.url_imagem && j.preco>0);
+  if (completo) det.push("foto+preço ✓ (prioridade)");
   // desempate determinístico: jogos mais leves primeiro para crianças menores
   s += (idade<8 ? (2-j.peso)*0.1 : 0);
   return {jogo:j, score:+s.toFixed(2), razoes, det};
 }
 function recomendar(r){
-  return CATALOGO.map(j=>pontuar(j,r)).filter(Boolean).sort((a,b)=>b.score-a.score).slice(0,5);
+  const comp = x => (x.jogo.url_afiliado && x.jogo.url_imagem && x.jogo.preco>0) ? 1 : 0;
+  return CATALOGO.map(j=>pontuar(j,r)).filter(Boolean).sort((a,b)=> comp(b)-comp(a) || b.score-a.score).slice(0,5);
 }
 function linkAmazon(j){
   const q=encodeURIComponent(j.nome+({jogo:" jogo",lego:"",brinquedo:" brinquedo"}[j.tipo]||""));
