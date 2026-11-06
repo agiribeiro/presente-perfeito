@@ -68,6 +68,11 @@ function pontuar(j, r){
   // perfil: +2 por tag em comum
   const comuns=(r.perfil||[]).filter(t=>j.perfil.includes(t));
   if (comuns.length){ s+=2*comuns.length; det.push(`perfil ${comuns.join(", ")} +${2*comuns.length}`); comuns.forEach(t=>razoes.push(NOME_TAG[t])); }
+  // "de turma" (brincar em grupo): nunca jogos de 1-2 jogadores; prioriza 4+
+  if ((r.perfil||[]).includes("brincar em grupo") && j.tipo==="jogo"){
+    if (j.jog_max && j.jog_max<=2) return null;
+    if (j.jog_max>=4){ s+=3; det.push("4+ jogadores +3"); razoes.push("ótimo para turma"); }
+  }
   // preço: limite forte. Acima da faixa só até 10% (com desconto na nota); mais que isso sai da lista.
   // Abaixo da faixa pode, mas perde 2 pontos por faixa de distância. Sem preço conhecido = neutro.
   if (j.preco>0){
