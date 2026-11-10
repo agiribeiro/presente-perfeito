@@ -2,7 +2,7 @@ name: Atualizar preços da Amazon
 
 on:
   schedule:
-    - cron: "17 9 * * *"      # todo dia 09:17 UTC = 06:17 em Natal
+    - cron: "17 9,21 * * *"   # todo dia 09:17 e 21:17 UTC = 06:17 e 18:17 em Natal
   workflow_dispatch:          # botão "Run workflow" para rodar na mão
 
 permissions:
