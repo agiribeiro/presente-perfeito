@@ -116,6 +116,21 @@ const $=s=>document.querySelector(s);
 const quiz=$("#quiz"), steps=$("#steps"), results=$("#results");
 $("#ncat").textContent=CATALOGO.length; $("#ncom").textContent=CATALOGO.filter(j=>j.url_afiliado).length;
 
+// rastreia no Google Analytics cada clique em "Ver na Amazon" (evento explícito, não depende da medição automática)
+document.addEventListener("click", function(e){
+  const a = e.target.closest('a[rel~="sponsored"]');
+  if (!a) return;
+  try{
+    if (typeof gtag === "function"){
+      gtag("event", "clique_amazon", {
+        destino: a.href,
+        produto: (a.closest(".res")?.querySelector("h3,.nome")?.textContent || "").trim().slice(0,100),
+        transport_type: "beacon"
+      });
+    }
+  }catch(_){}
+});
+
 function renderSteps(){
   const P=perguntas();
   steps.innerHTML = `<div class="track"><i style="width:${Math.round((passo+1)/P.length*100)}%"></i></div><span>${Math.min(passo+1,P.length)} de ${P.length}</span>`;
