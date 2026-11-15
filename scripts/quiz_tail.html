@@ -54,7 +54,7 @@ function pontuar(j, r){
   const razoes=[], det=[];
   let s=0;
   // tipo: filtro duro, exceto "surpreenda-me"
-  if (r.tipo!=="surpresa" && j.tipo!==r.tipo) return null;
+  if (r.tipo!=="surpresa" && !((j.tipos&&j.tipos.length?j.tipos:[j.tipo]).includes(r.tipo))) return null;
   // idade: filtro duro pela idade ideal mínima (curadoria), não pela da caixa
   // jogo leve pode descer um pouco na idade: complexidade <=1.5 → 2 anos abaixo; <=2.0 → 1 ano abaixo
   const idade=r.idade;

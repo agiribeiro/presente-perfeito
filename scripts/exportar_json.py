@@ -18,6 +18,7 @@ for i, row in enumerate(ws.iter_rows(min_row=2, values_only=True), 1):
     pq = str(d["por_que"] or "").replace(" (rascunho automático — reescrever)", "").replace("(rascunho automático)", "").strip()
     out.append(dict(
         id=i, nome=d["nome"], nome_en=d["nome_en"] or d["nome"], tipo=d["tipo"] or "jogo", asin=d["asin"] or "",
+        tipos=[t for t in ([d["tipo"] or "jogo"] + [x.strip().lower() for x in str(d.get("tambem") or "").replace(";", ",").split(",") if x.strip()]) if t],
         idade_min=int(d["idade_min"] or 0), ideal_min=int(d["idade_ideal_min"] or d["idade_min"] or 0),
         ideal_max=int(d["idade_ideal_max"] or 99),
         jog_min=int(d["jogadores_min"] or 0), jog_max=int(d["jogadores_max"] or 0), dur=int(d["duracao_min"] or 0),
