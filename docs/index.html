@@ -281,7 +281,16 @@ function pontuar(j, r){
 }
 function recomendar(r){
   const comp = x => (x.jogo.url_afiliado && x.jogo.url_imagem && x.jogo.preco>0) ? 1 : 0;
-  return CATALOGO.map(j=>pontuar(j,r)).filter(Boolean).sort((a,b)=> comp(b)-comp(a) || b.score-a.score).slice(0,5);
+  const ordenado = CATALOGO.map(j=>pontuar(j,r)).filter(Boolean).sort((a,b)=> comp(b)-comp(a) || b.score-a.score);
+  // nunca repetir o mesmo produto (por ASIN, ou nome quando não tem ASIN): mantém a melhor posição
+  const vistos=new Set(), unicos=[];
+  for (const x of ordenado){
+    const chave=String(x.jogo.asin||x.jogo.nome||"").trim().toLowerCase();
+    if (chave && vistos.has(chave)) continue;
+    vistos.add(chave); unicos.push(x);
+    if (unicos.length>=5) break;
+  }
+  return unicos;
 }
 function linkAmazon(j){
   const q=encodeURIComponent(j.nome+({jogo:" jogo",lego:"",brinquedo:" brinquedo"}[j.tipo]||""));
