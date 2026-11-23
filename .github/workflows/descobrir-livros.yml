@@ -1,0 +1,41 @@
+name: Descobrir livros na Amazon
+
+# Roda sob demanda (botão "Run workflow"). Carrega a semente de livros,
+# acha ASIN/preço/foto de cada um na Amazon e grava os resultados na planilha
+# (colunas asin_sugerido / titulo_amazon / preco_sugerido / confianca) para revisão.
+# NÃO ativa nem publica nada: a revisão e a publicação são passos separados.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  descobrir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements.txt
+
+      - name: Carregar semente de livros no Catálogo
+        run: python scripts/carregar_semente.py catalogo_presentes.xlsx
+
+      - name: Buscar ASIN, preço e foto de cada item sem ASIN
+        env:
+          AMAZON_CRED_ID: ${{ secrets.AMAZON_CRED_ID }}
+          AMAZON_CRED_SECRET: ${{ secrets.AMAZON_CRED_SECRET }}
+          AMAZON_TAG: ${{ secrets.AMAZON_TAG }}
+        run: python scripts/amazon_sync.py catalogo_presentes.xlsx --descobrir
+
+      - name: Salvar a planilha com as sugestões (para revisão)
+        run: |
+          git config user.name "robo-livros"
+          git config user.email "actions@users.noreply.github.com"
+          git add catalogo_presentes.xlsx
+          git diff --cached --quiet && echo "sem mudanças" || git commit -m "Descoberta de livros: $(date -u +%Y-%m-%d)" && git push
