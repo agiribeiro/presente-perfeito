@@ -204,8 +204,8 @@ const HUE = {criativo:"#FF6B6B",competitivo:"#2E5BFF",curioso:"#1E9E63",constru�
 const PERGUNTAS_BASE = [
   { key:"tipo", titulo:"O que você procura?", single:true,
     opts:[ ["jogo","Jogo de tabuleiro","Cartas, tabuleiro, dados","dado"], ["brinquedo","Brinquedo","Educativo, criativo, de rua","urso"],
-           ["lego","LEGO / construção","Blocos e kits de montar","bloco"], ["surpresa","Surpreenda-me","Qualquer categoria","presente"] ] },
-  { key:"genero", titulo:"Para quem é o presente?", single:true, so:["brinquedo","lego","surpresa"],
+           ["lego","LEGO / construção","Blocos e kits de montar","bloco"], ["livro","Livros","Histórias para presentear","livro"], ["surpresa","Surpreenda-me","Qualquer categoria","presente"] ] },
+  { key:"genero", titulo:"Para quem é o presente?", single:true, so:["brinquedo","lego","surpresa","livro"],
     hint:"Só muda o peso de itens que a marca posiciona para um público; a maioria serve para qualquer criança.",
     opts:[ ["ambos","Tanto faz","Qualquer criança","todos"], ["menina","Menina","","menina"], ["menino","Menino","","menino"] ] },
   { key:"idade", titulo:"Quantos anos tem quem vai ganhar?", tipo:"idade",
@@ -223,7 +223,10 @@ const PERGUNTAS_BASE = [
            ["cri","Criatividade","Imaginação e expressão","lampada"], ["imp","Impressionar","Uau ao abrir a caixa","estrela"], ["cb","Custo-benefício","Valor pelo que custa","moeda"] ] },
 ];
 function perguntas(){
-  const lista=PERGUNTAS_BASE.filter(q=>!q.so || q.so.includes(resp.tipo));
+  // a opção "Livros" só aparece quando já há livros publicados no catálogo
+  const temLivro = CATALOGO.some(j=>j.tipo==="livro");
+  const base = temLivro ? PERGUNTAS_BASE : PERGUNTAS_BASE.map(q=> q.key==="tipo" ? Object.assign({},q,{opts:q.opts.filter(o=>o[0]!=="livro")}) : q);
+  const lista=base.filter(q=>!q.so || q.so.includes(resp.tipo));
   return lista.map((q,i)=>Object.assign({},q,{eyebrow:`Pergunta ${i+1} de ${lista.length}`}));
 }
 const NOME_TAG = {criativo:"criativa",competitivo:"competitiva",curioso:"curiosa",construção:"construtora",ciência:"científica",arte:"artística",esportes:"agitada",estratégia:"estrategista",personagens:"fã de personagens","brincar em grupo":"de turma",motor:"de movimento","faz de conta":"de faz de conta"};
