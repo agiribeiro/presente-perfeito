@@ -118,14 +118,23 @@ def descobrir(ws, api):
             cand = json.loads(arq.read_text(encoding="utf-8"))
         else:
             try:
-                res = api.search_items(keywords=termo, item_count=3)
+                res = api.search_items(keywords=termo, item_count=8)
                 cand = [extrair(it) for it in (res.items or [])]
             except Exception as e:
                 print(f"  [{nome}] erro na busca: {str(e)[:120]}"); continue
             arq.write_text(json.dumps(cand, ensure_ascii=False), encoding="utf-8")
         if not cand:
             ws.cell(r, h["confianca"]).value = "nenhum"; continue
-        melhor = max(cand, key=lambda c: (confianca(nome, c["titulo"]) == "alta", confianca(nome, c["titulo"]) == "média", c["preco"] or 0))
+        BUNDLE = re.compile(r"\bkit\b|\bcombo\b|cole[cç][aã]o|\bbox\b|\d+\s*livros|\+", re.I)
+        def _pontos(c):
+            t = str(c.get("titulo") or "")
+            nt, nn = norm(t), norm(nome)
+            exato = 2 if nt == nn else (1 if nn and nn <= nt and len(nt) - len(nn) <= 2 else 0)
+            conf = {"alta": 2, "média": 1}.get(confianca(nome, t), 0)
+            eh_bundle = 1 if BUNDLE.search(t) else 0
+            preco = c.get("preco") or 10 ** 9  # sem preço = tratado como caro (desprioriza)
+            return (-eh_bundle, exato, conf, -preco)  # evita kit/combo, prefere título exato e avulso mais barato
+        melhor = max(cand, key=_pontos)
         ws.cell(r, h["asin_sugerido"]).value = melhor["asin"]
         ws.cell(r, h["titulo_amazon"]).value = melhor["titulo"]
         ws.cell(r, h["preco_sugerido"]).value = melhor["preco"]
