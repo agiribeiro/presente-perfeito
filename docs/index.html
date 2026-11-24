@@ -208,8 +208,11 @@ const PERGUNTAS_BASE = [
   { key:"genero", titulo:"Para quem é o presente?", single:true, so:["brinquedo","lego","surpresa","livro"],
     hint:"Só muda o peso de itens que a marca posiciona para um público; a maioria serve para qualquer criança.",
     opts:[ ["ambos","Tanto faz","Qualquer criança","todos"], ["menina","Menina","","menina"], ["menino","Menino","","menino"] ] },
-  { key:"idade", titulo:"Quantos anos tem quem vai ganhar?", tipo:"idade",
+  { key:"idade", titulo:"Quantos anos tem quem vai ganhar?", tipo:"idade", so:["jogo","brinquedo","lego","surpresa"],
     hint:"Vale a idade de quem vai jogar mais, não a mínima da caixa." },
+  { key:"idade", titulo:"Para qual idade é o livro?", single:true, so:["livro"],
+    opts:[ ["1","Até 1 ano","Bebê · primeiros livros"], ["2","2 anos",""], ["3","3 anos",""],
+           ["4","4 anos",""], ["5","5 anos",""], ["6","6 anos ou mais",""] ] },
   { key:"perfil", titulo:"Como essa pessoa é?", hint:"Escolha até 2.", max:2,
     opts:[ ["criativo","Criativa","Inventa, desenha, conta histórias"], ["competitivo","Competitiva","Quer vencer"],
            ["curioso","Curiosa","Gosta de descobrir e deduzir"], ["construção","Construtora","Monta e encaixa"],
@@ -242,7 +245,7 @@ function pontuar(j, r){
   if (r.tipo!=="surpresa" && !((j.tipos&&j.tipos.length?j.tipos:[j.tipo]).includes(r.tipo))) return null;
   // idade: filtro duro pela idade ideal mínima (curadoria), não pela da caixa
   // jogo leve pode descer um pouco na idade: complexidade <=1.5 → 2 anos abaixo; <=2.0 → 1 ano abaixo
-  const idade=r.idade;
+  const idade=+r.idade;
   const folga = j.peso<=1.5 ? 2 : (j.peso<=2.0 ? 1 : 0);
   if (idade < j.ideal_min - folga) return null;
   if (idade>=j.ideal_min && idade<=j.ideal_max){ s+=3; det.push("idade ideal +3"); razoes.push(`certo para ${idade>=18?"adultos":idade+" anos"}`); }
