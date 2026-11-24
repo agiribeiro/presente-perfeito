@@ -20,6 +20,10 @@ try:
     from semente_livros_bebe import LIVROS_BEBE
 except ImportError:
     LIVROS_BEBE = []
+try:
+    from semente_livros_homemcao import LIVROS_HOMEMCAO
+except ImportError:
+    LIVROS_HOMEMCAO = []
 
 arq = sys.argv[1] if len(sys.argv) > 1 else "catalogo_presentes.xlsx"
 wb = load_workbook(arq); ws = wb["Catálogo"]
@@ -29,7 +33,7 @@ for col in ("busca_amazon",):
         ws.cell(1, ws.max_column + 1).value = col; h[col] = ws.max_column
 ja = {str(ws.cell(r, h["nome"]).value).strip().lower() for r in range(2, ws.max_row + 1) if ws.cell(r, h["nome"]).value}
 hoje = dt.date.today().isoformat(); n = 0
-for tipo, lista in (("lego", LEGO), ("brinquedo", BRINQUEDOS), ("livro", LIVROS), ("livro", LIVROS_MARCELA), ("livro", LIVROS_BEBE)):
+for tipo, lista in (("lego", LEGO), ("brinquedo", BRINQUEDOS), ("livro", LIVROS), ("livro", LIVROS_MARCELA), ("livro", LIVROS_BEBE), ("livro", LIVROS_HOMEMCAO)):
     for j in lista:
         if j["nome"].strip().lower() in ja: continue
         linha = {
