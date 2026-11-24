@@ -1,0 +1,39 @@
+name: Buscar livros por palavra-chave
+
+# Busca um termo na Amazon e grava os produtos encontrados na aba Candidatos
+# (com ASIN, preço, foto e link), para revisão. Não ativa nem publica nada.
+
+on:
+  workflow_dispatch:
+    inputs:
+      termo:
+        description: "Termo de busca (ex.: Isadora Moon)"
+        required: true
+        default: "Isadora Moon"
+
+permissions:
+  contents: write
+
+jobs:
+  buscar:
+    runs-on: ubuntu-latest
+    env:
+      TERMO: ${{ inputs.termo }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Buscar na Amazon e gravar em Candidatos
+        env:
+          AMAZON_CRED_ID: ${{ secrets.AMAZON_CRED_ID }}
+          AMAZON_CRED_SECRET: ${{ secrets.AMAZON_CRED_SECRET }}
+          AMAZON_TAG: ${{ secrets.AMAZON_TAG }}
+        run: python scripts/amazon_sync.py catalogo_presentes.xlsx --buscar "$TERMO" --tipo livro
+      - name: Salvar planilha com os candidatos
+        run: |
+          git config user.name "robo-busca"
+          git config user.email "actions@users.noreply.github.com"
+          git add catalogo_presentes.xlsx
+          git diff --cached --quiet && echo "sem mudanças" || git commit -m "Busca Amazon: $TERMO" && git push
