@@ -103,7 +103,7 @@ function pontuar(j, r){
   s += (idade<8 ? (2-j.peso)*0.1 : 0);
   return {jogo:j, score:+s.toFixed(2), razoes, det};
 }
-const SERIE_PRE=["o homem-cao","o clube do pepezinho","diario de um banana","diario de rowley","as aventuras de mike","harry potter","isadora moon","pippi"];
+const SERIE_PRE=["o homem-cao","o clube do pepezinho","diario de um banana","diario de rowley","as aventuras de mike","harry potter","isadora moon","pippi","ludoteca disney"];
 function serieDe(nome){
   const n=String(nome||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
   for (const p of SERIE_PRE) if (n.startsWith(p)) return p;
