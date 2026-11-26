@@ -10,6 +10,10 @@ on:
         description: "Termo de busca (ex.: Isadora Moon)"
         required: true
         default: "Isadora Moon"
+      tipo:
+        description: "Tipo (livro, jogo, brinquedo, lego)"
+        required: true
+        default: "livro"
 
 permissions:
   contents: write
@@ -19,6 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TERMO: ${{ inputs.termo }}
+      TIPO: ${{ inputs.tipo }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -30,7 +35,7 @@ jobs:
           AMAZON_CRED_ID: ${{ secrets.AMAZON_CRED_ID }}
           AMAZON_CRED_SECRET: ${{ secrets.AMAZON_CRED_SECRET }}
           AMAZON_TAG: ${{ secrets.AMAZON_TAG }}
-        run: python scripts/amazon_sync.py catalogo_presentes.xlsx --buscar "$TERMO" --tipo livro
+        run: python scripts/amazon_sync.py catalogo_presentes.xlsx --buscar "$TERMO" --tipo "$TIPO"
       - name: Salvar planilha com os candidatos
         run: |
           git config user.name "robo-busca"
